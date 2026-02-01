@@ -27,8 +27,11 @@ class Settings(BaseSettings):
     CORS_ORIGINS: list = [
         "http://localhost:4200",
         "http://localhost:80",
-        "http://frontend:80"
+        "http://frontend:80",
+        "https://*.railway.app",
+        "https://*.up.railway.app"
     ]
+    CORS_ALLOW_ALL: bool = True
     
     class Config:
         env_file = ".env"
