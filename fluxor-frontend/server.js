@@ -5,13 +5,13 @@ const port = process.env.PORT || 3000;
 
 const server = http.createServer((request, response) => {
   return handler(request, response, {
-    public: 'dist/fluxor-atendimento/browser',
+    public: 'dist',
     rewrites: [
       { source: '**', destination: '/index.html' }
     ]
   });
 });
 
-server.listen(port, () => {
-  console.log(`Frontend running at http://localhost:${port}`);
+server.listen(port, '0.0.0.0', () => {
+  console.log(`Frontend running at http://0.0.0.0:${port}`);
 });
