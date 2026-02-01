@@ -1,0 +1,418 @@
+<div class="relatorios-container">
+  <app-sidebar></app-sidebar>
+
+  <div class="main-content">
+    <header class="content-header">
+      <div class="search-bar">
+        <mat-icon>search</mat-icon>
+        <input type="text" placeholder="Buscar pacientes, agendamentos...">
+      </div>
+      
+      <div class="user-info">
+        <mat-icon class="notification-icon">notifications_none</mat-icon>
+        
+        <button mat-icon-button [matMenuTriggerFor]="userMenu" class="user-avatar">
+          <div class="avatar-circle">{{ userInitials }}</div>
+        </button>
+        
+        <mat-menu #userMenu="matMenu" class="user-menu">
+          <div class="user-menu-header">
+            <div class="avatar-circle large">{{ userInitials }}</div>
+            <div class="user-details">
+              <h4>{{ userName }}</h4>
+              <p>Admin</p>
+            </div>
+          </div>
+          
+          <button mat-menu-item (click)="goToProfile()">
+            <mat-icon>person</mat-icon>
+            <span>Meu Perfil</span>
+          </button>
+          
+          <button mat-menu-item (click)="logout()">
+            <mat-icon>logout</mat-icon>
+            <span>Sair</span>
+          </button>
+        </mat-menu>
+      </div>
+    </header>
+
+    <div class="content-body">
+      <div class="page-header">
+        <div class="header-info">
+          <h1>Relatórios</h1>
+          <p>Transforme operação em decisão estratégica</p>
+        </div>
+      </div>
+
+      <div class="filters-section">
+        <div class="filters-label">
+          <mat-icon>tune</mat-icon>
+          <span>Filtros:</span>
+        </div>
+        
+        <select [(ngModel)]="selectedPeriod" class="select-input">
+          <option *ngFor="let p of periods" [value]="p.value">{{ p.label }}</option>
+        </select>
+
+        <select [(ngModel)]="selectedProfissional" class="select-input">
+          <option *ngFor="let prof of profissionais" [value]="prof.value">{{ prof.label }}</option>
+        </select>
+
+        <select [(ngModel)]="selectedServico" class="select-input">
+          <option *ngFor="let srv of servicos" [value]="srv.value">{{ srv.label }}</option>
+        </select>
+
+        <button class="btn-exportar" (click)="exportarDados()">
+          <mat-icon>download</mat-icon>
+          Exportar
+        </button>
+      </div>
+
+      <div class="tabs-section">
+        <div class="tabs-list">
+          <button 
+            *ngFor="let tab of tabs" 
+            [class.active]="activeTab === tab.id"
+            (click)="selectTab(tab.id)"
+            class="tab-button"
+          >
+            <mat-icon>{{ tab.icon }}</mat-icon>
+            <span>{{ tab.label }}</span>
+          </button>
+        </div>
+      </div>
+
+      <div *ngIf="activeTab === 'visao-geral'" class="tab-content">
+        <div class="indicadores-section">
+          <h2>Indicadores Principais</h2>
+          <div class="indicadores-grid">
+            <div class="indicador-card blue">
+              <div class="indicador-header">
+                <span class="indicador-label">{{ indicadores.contatosRecebidos.label }}</span>
+                <mat-icon>{{ indicadores.contatosRecebidos.icon }}</mat-icon>
+              </div>
+              <div class="indicador-valor">{{ indicadores.contatosRecebidos.valor }}</div>
+              <div class="indicador-variacao positive">
+                <mat-icon>trending_up</mat-icon>
+                <span>+{{ indicadores.contatosRecebidos.variacao }}% vs mês anterior</span>
+              </div>
+            </div>
+
+            <div class="indicador-card green">
+              <div class="indicador-header">
+                <span class="indicador-label">{{ indicadores.agendamentosCriados.label }}</span>
+                <mat-icon>{{ indicadores.agendamentosCriados.icon }}</mat-icon>
+              </div>
+              <div class="indicador-valor">{{ indicadores.agendamentosCriados.valor }}</div>
+              <div class="indicador-variacao positive">
+                <mat-icon>trending_up</mat-icon>
+                <span>+{{ indicadores.agendamentosCriados.variacao }}% vs mês anterior</span>
+              </div>
+            </div>
+
+            <div class="indicador-card purple">
+              <div class="indicador-header">
+                <span class="indicador-label">{{ indicadores.atendimentosRealizados.label }}</span>
+                <mat-icon>{{ indicadores.atendimentosRealizados.icon }}</mat-icon>
+              </div>
+              <div class="indicador-valor">{{ indicadores.atendimentosRealizados.valor }}</div>
+              <div class="indicador-variacao positive">
+                <mat-icon>trending_up</mat-icon>
+                <span>+{{ indicadores.atendimentosRealizados.variacao }}% vs mês anterior</span>
+              </div>
+            </div>
+
+            <div class="indicador-card orange">
+              <div class="indicador-header">
+                <span class="indicador-label">{{ indicadores.taxaConversao.label }}</span>
+                <mat-icon>{{ indicadores.taxaConversao.icon }}</mat-icon>
+              </div>
+              <div class="indicador-valor">{{ indicadores.taxaConversao.valor }}{{ indicadores.taxaConversao.unidade }}</div>
+              <div class="indicador-variacao negative">
+                <mat-icon>trending_down</mat-icon>
+                <span>{{ indicadores.taxaConversao.variacao }}% vs mês anterior</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="metricas-section">
+          <div class="metricas-grid">
+            <div *ngFor="let metrica of metricas" [class]="'metrica-card ' + metrica.cor">
+              <div class="metrica-top">
+                <span class="metrica-titulo">{{ metrica.titulo }}</span>
+                <mat-icon>{{ metrica.icon }}</mat-icon>
+              </div>
+              <div class="metrica-valor">{{ metrica.valor }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="activeTab === 'funil-conversao'" class="tab-content">
+        <div class="funil-section">
+          <h2>Funil de Conversão</h2>
+          <p class="funil-description">Visualize onde os clientes entram, avançam ou abandonam o funil de vendas</p>
+          
+          <div class="funil-container">
+            <div *ngFor="let etapa of funilConversao" class="funil-etapa">
+              <div class="etapa-header">
+                <div class="etapa-info">
+                  <mat-icon>{{ etapa.icon }}</mat-icon>
+                  <div class="etapa-texts">
+                    <span class="etapa-nome">{{ etapa.etapa }}</span>
+                    <span class="etapa-meta">{{ etapa.percentual }}% da meta</span>
+                  </div>
+                </div>
+                <div class="etapa-stats">
+                  <span class="etapa-numero">{{ etapa.quantidade }}</span>
+                  <div [class.variacao-negative]="etapa.variacao < 0" [class.variacao-neutral]="etapa.variacao === 0" class="etapa-variacao">
+                    <mat-icon *ngIf="etapa.variacao > 0">trending_up</mat-icon>
+                    <mat-icon *ngIf="etapa.variacao < 0">trending_down</mat-icon>
+                    <mat-icon *ngIf="etapa.variacao === 0">remove</mat-icon>
+                    <span *ngIf="etapa.variacao !== 0">{{ etapa.variacao | number: '1.1-1' }}%</span>
+                  </div>
+                </div>
+              </div>
+              <div class="etapa-bar">
+                <div class="etapa-progress" [style.width.%]="etapa.percentual"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Por Profissional -->
+      <div *ngIf="activeTab === 'por-profissional'" class="tab-content">
+        <h2>Desempenho por Profissional</h2>
+        <div class="table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>PROFISSIONAL</th>
+                <th>ATENDIMENTOS</th>
+                <th>TAXA NO-SHOW</th>
+                <th>RECEITA</th>
+                <th>TEMPO MÉDIO</th>
+                <th>RETORNOS</th>
+                <th>AÇÕES</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let prof of desempenhoProfissional">
+                <td class="col-name"><strong>{{ prof.profissional }}</strong></td>
+                <td>{{ prof.atendimentos }}</td>
+                <td [class.high-risk]="prof.taxaNoShow > 8">{{ prof.taxaNoShow }}%</td>
+                <td class="col-money">R$ {{ prof.receita | number: '1.0-0' }}</td>
+                <td>{{ prof.tempoMedio }} min</td>
+                <td>{{ prof.retornos }}</td>
+                <td><a href="javascript:void(0)" class="link-action">Ver Detalhes</a></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Por Serviço -->
+      <div *ngIf="activeTab === 'por-servico'" class="tab-content">
+        <h2>Desempenho por Serviço</h2>
+        <div class="table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>SERVIÇO</th>
+                <th>AGENDADOS</th>
+                <th>REALIZADOS</th>
+                <th>TAXA CONV.</th>
+                <th>RECEITA</th>
+                <th>TICKET MÉDIO</th>
+                <th>% RETORNO</th>
+                <th>AÇÕES</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let srv of desempenhoServico">
+                <td class="col-name"><strong>{{ srv.servico }}</strong></td>
+                <td>{{ srv.agendados }}</td>
+                <td>{{ srv.realizados }}</td>
+                <td class="high-success">{{ srv.taxaConversao }}%</td>
+                <td class="col-money">R$ {{ srv.receita | number: '1.0-0' }}</td>
+                <td class="col-money">R$ {{ srv.ticketMedio }}</td>
+                <td>{{ srv.percentualRetorno }}%</td>
+                <td><a href="javascript:void(0)" class="link-action">Ver Detalhes</a></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Financeiro -->
+      <div *ngIf="activeTab === 'financeiro'" class="tab-content">
+        <h2>Relatório Financeiro</h2>
+        
+        <div class="financial-kpis">
+          <div class="kpi-card green">
+            <span class="kpi-label">Receita Total</span>
+            <span class="kpi-value">R$ 76.850,00</span>
+            <span class="kpi-change">↑ +15.2% vs mês anterior</span>
+          </div>
+          <div class="kpi-card blue">
+            <span class="kpi-label">Ticket Médio</span>
+            <span class="kpi-value">R$ 352,52</span>
+            <span class="kpi-change">↑ +3.8% vs mês anterior</span>
+          </div>
+          <div class="kpi-card purple">
+            <span class="kpi-label">Crescimento</span>
+            <span class="kpi-value">+15.2%</span>
+            <span class="kpi-change">Em relação ao mês anterior</span>
+          </div>
+        </div>
+
+        <div class="financial-section">
+          <h3>Receita por Categoria</h3>
+          <div class="category-list">
+            <div *ngFor="let cat of receitaPorCategoria" class="category-item">
+              <div class="category-header">
+                <span class="category-name">{{ cat.categoria }}</span>
+                <span class="category-value">R$ {{ cat.valor | number: '1.0-0' }} ({{ cat.percentual }}%)</span>
+              </div>
+              <div class="category-bar">
+                <div class="category-progress" [style.width.%]="cat.percentual" [style.backgroundColor]="cat.cor"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Retorno -->
+      <div *ngIf="activeTab === 'retorno'" class="tab-content">
+        <h2>Retorno e Recorrência</h2>
+        
+        <div class="return-kpis">
+          <div class="return-card purple">
+            <span class="return-label">Clientes que Retornam</span>
+            <span class="return-value">42.3%</span>
+          </div>
+          <div class="return-card blue">
+            <span class="return-label">Tempo Médio entre Atendimentos</span>
+            <span class="return-value">28 dias</span>
+          </div>
+          <div class="return-card green">
+            <span class="return-label">Receita de Retornos</span>
+            <span class="return-value">R$ 9.900</span>
+          </div>
+          <div class="return-card orange">
+            <span class="return-label">Taxa de Fidelização</span>
+            <span class="return-value">67%</span>
+          </div>
+        </div>
+
+        <div class="return-section">
+          <h3>Serviços que Mais Geram Retorno</h3>
+          <div class="table-container">
+            <table class="data-table simple">
+              <thead>
+                <tr>
+                  <th>SERVIÇO</th>
+                  <th>REALIZADOS</th>
+                  <th>% RETORNO</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let srv of servicosComMaiorRetorno">
+                  <td><strong>{{ srv.servico }}</strong></td>
+                  <td>{{ srv.realizados }} realizados</td>
+                  <td><strong style="color: #a855f7;">{{ srv.percentualRetorno }}%</strong></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Origem -->
+      <div *ngIf="activeTab === 'origem'" class="tab-content">
+        <h2>Origem e Canais</h2>
+        
+        <div class="origin-kpis">
+          <div class="origin-card green">
+            <span class="origin-label">Agendamento Online</span>
+            <span class="origin-value">142</span>
+            <span class="origin-percentage">55% do total</span>
+          </div>
+          <div class="origin-card orange">
+            <span class="origin-label">Lista de Espera</span>
+            <span class="origin-value">68</span>
+            <span class="origin-percentage">26% do total</span>
+          </div>
+          <div class="origin-card blue">
+            <span class="origin-label">Cadastro Manual</span>
+            <span class="origin-value">46</span>
+            <span class="origin-percentage">18% do total</span>
+          </div>
+          <div class="origin-card purple">
+            <span class="origin-label">Taxa de Conversão Média</span>
+            <span class="origin-value">63.7%</span>
+          </div>
+        </div>
+
+        <div class="origin-section">
+          <h3>Desempenho por Origem</h3>
+          <div class="table-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>ORIGEM</th>
+                  <th>CLIENTES</th>
+                  <th>CONVERSÃO</th>
+                  <th>RECEITA</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let orig of desempenhoOrigem">
+                  <td><strong>{{ orig.origem }}</strong></td>
+                  <td>{{ orig.clientes }}</td>
+                  <td class="high-success">{{ orig.conversao }}%</td>
+                  <td class="col-money">R$ {{ orig.receita | number: '1.0-0' }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Exportações -->
+      <div *ngIf="activeTab === 'exportacoes'" class="tab-content">
+        <h2>Exportações e Comparações</h2>
+        
+        <div class="export-grid">
+          <div class="export-card">
+            <mat-icon>description</mat-icon>
+            <h3>Exportar Relatório Completo</h3>
+            <p>Todas as métricas em formato CSV</p>
+            <button class="btn-export">Exportar</button>
+          </div>
+          <div class="export-card">
+            <mat-icon>picture_as_pdf</mat-icon>
+            <h3>Exportar em PDF</h3>
+            <p>Relatório formatado para apresentação</p>
+            <button class="btn-export">Exportar</button>
+          </div>
+          <div class="export-card">
+            <mat-icon>trending_up</mat-icon>
+            <h3>Comparar Períodos</h3>
+            <p>Mês a mês, trimestre ou ano</p>
+            <button class="btn-export">Comparar</button>
+          </div>
+          <div class="export-card">
+            <mat-icon>people</mat-icon>
+            <h3>Comparar Profissionais</h3>
+            <p>Análise comparativa de desempenho</p>
+            <button class="btn-export">Comparar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

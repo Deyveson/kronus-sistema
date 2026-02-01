@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <!-- Gradiente principal lavanda/azul -->
+    <linearGradient id="mainGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#c7d2fe"/>
+      <stop offset="50%" style="stop-color:#a5b4fc"/>
+      <stop offset="100%" style="stop-color:#818cf8"/>
+    </linearGradient>
+    
+    <!-- Gradiente para bordas (efeito metálico rosa) -->
+    <linearGradient id="edgeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#fda4af"/>
+      <stop offset="50%" style="stop-color:#f0abfc"/>
+      <stop offset="100%" style="stop-color:#c4b5fd"/>
+    </linearGradient>
+    
+    <!-- Gradiente rosa/roxo para seta e perna do K -->
+    <linearGradient id="pinkGrad" x1="100%" y1="100%" x2="0%" y2="0%">
+      <stop offset="0%" style="stop-color:#ec4899"/>
+      <stop offset="50%" style="stop-color:#d946ef"/>
+      <stop offset="100%" style="stop-color:#a855f7"/>
+    </linearGradient>
+    
+    <!-- Filtro de sombra com brilho -->
+    <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="1.5" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    
+    <!-- Sombra suave -->
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="1" dy="1" stdDeviation="1" flood-color="#6366f1" flood-opacity="0.5"/>
+    </filter>
+  </defs>
+  
+  <!-- CÍRCULO SEGMENTADO (4 arcos com gaps nos cantos) -->
+  
+  <!-- Arco superior esquerdo -->
+  <path d="M 28 10 A 42 42 0 0 0 10 32" 
+        stroke="url(#mainGrad)" stroke-width="9" fill="none" stroke-linecap="round" filter="url(#glow)"/>
+  
+  <!-- Arco inferior esquerdo -->
+  <path d="M 10 68 A 42 42 0 0 0 32 90" 
+        stroke="url(#mainGrad)" stroke-width="9" fill="none" stroke-linecap="round" filter="url(#glow)"/>
+  
+  <!-- Arco inferior direito -->
+  <path d="M 68 90 A 42 42 0 0 0 90 68" 
+        stroke="url(#mainGrad)" stroke-width="9" fill="none" stroke-linecap="round" filter="url(#glow)"/>
+  
+  <!-- Arco superior direito -->
+  <path d="M 90 32 A 42 42 0 0 0 72 10" 
+        stroke="url(#mainGrad)" stroke-width="9" fill="none" stroke-linecap="round" filter="url(#glow)"/>
+  
+  <!-- LETRA K -->
+  
+  <!-- Barra vertical do K -->
+  <rect x="28" y="28" width="11" height="44" rx="2" fill="url(#mainGrad)" filter="url(#shadow)"/>
+  
+  <!-- Diagonal superior do K -->
+  <polygon points="39,46 39,38 58,22 64,28" fill="url(#mainGrad)" filter="url(#shadow)"/>
+  
+  <!-- Diagonal inferior do K (rosa/roxo) -->
+  <polygon points="39,54 39,62 60,82 68,74" fill="url(#pinkGrad)" filter="url(#shadow)"/>
+  
+  <!-- SETA DIAGONAL -->
+  
+  <!-- Corpo da seta -->
+  <polygon points="58,26 54,32 84,2 88,6" fill="url(#pinkGrad)" filter="url(#glow)"/>
+  
+  <!-- Ponta da seta (triângulo) -->
+  <polygon points="92,-2 78,8 82,14 94,2" fill="url(#pinkGrad)" filter="url(#glow)"/>
+</svg>

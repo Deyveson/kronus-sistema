@@ -1,0 +1,178 @@
+.sidebar-container {
+  height: 100vh;
+  background: #1e2739;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  width: 275px;
+  flex-shrink: 0;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+  overflow-x: hidden;
+}
+
+.sidebar-header {
+  padding: 24px 16px;
+  background: transparent;
+  border-radius: 0;
+  margin: 16px 16px 0 16px;
+}
+
+.clinic-info {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.clinic-logo {
+  width: 60px;
+  height: 60px;
+  object-fit: contain;
+  animation: logo-float 4s ease-in-out infinite, logo-glow 3s ease-in-out infinite;
+  filter: drop-shadow(0 0 12px rgba(168, 85, 247, 0.6));
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  
+  &:hover {
+    transform: scale(1.2) rotate(15deg);
+    filter: drop-shadow(0 0 25px rgba(236, 72, 153, 0.9));
+    animation-play-state: paused;
+  }
+}
+
+@keyframes logo-float {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  25% {
+    transform: translateY(-3px) rotate(2deg);
+  }
+  75% {
+    transform: translateY(3px) rotate(-2deg);
+  }
+}
+
+@keyframes logo-glow {
+  0%, 100% {
+    filter: drop-shadow(0 0 10px rgba(168, 85, 247, 0.5)) drop-shadow(0 0 20px rgba(99, 102, 241, 0.3));
+  }
+  33% {
+    filter: drop-shadow(0 0 15px rgba(236, 72, 153, 0.6)) drop-shadow(0 0 25px rgba(217, 70, 239, 0.4));
+  }
+  66% {
+    filter: drop-shadow(0 0 12px rgba(59, 130, 246, 0.5)) drop-shadow(0 0 22px rgba(139, 92, 246, 0.3));
+  }
+}
+
+.clinic-icon {
+  font-size: 40px;
+  width: 40px;
+  height: 40px;
+  color: white;
+}
+
+.clinic-details {
+  h3 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    background: linear-gradient(90deg, #ec4899, #8b5cf6, #3b82f6, #ec4899);
+    background-size: 300% 100%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: gradient-shift 4s ease infinite;
+  }
+
+  p {
+    margin: 4px 0 0 0;
+    font-size: 13px;
+    opacity: 0.8;
+    letter-spacing: 1px;
+  }
+}
+
+@keyframes gradient-shift {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+.sidebar-nav {
+  flex: 1;
+  padding: 16px 0;
+}
+
+.nav-item {
+  color: white !important;
+  margin: 4px 16px;
+  padding: 8px 12px;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  max-width: calc(100% - 32px);
+
+  mat-icon {
+    color: white;
+  }
+
+  &:hover {
+    background-color: rgba(236, 72, 153, 0.1);
+    color: white !important;
+    
+    mat-icon {
+      color: white;
+    }
+  }
+
+  &.active {
+    background: linear-gradient(135deg, #ec4899 0%, #f472b6 100%);
+    color: white !important;
+    font-weight: 500;
+    box-shadow: 0 4px 12px rgba(236, 72, 153, 0.3);
+    
+    mat-icon {
+      color: white;
+    }
+  }
+}
+
+.sidebar-footer {
+  padding: 16px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+::ng-deep {
+  .sidebar-container {
+    mat-nav-list {
+      --mdc-list-list-item-label-text-color: white;
+      --mdc-list-list-item-leading-icon-color: white;
+      --mat-list-active-indicator-color: transparent;
+    }
+    
+    mat-list-item {
+      color: white !important;
+      
+      .mdc-list-item__content {
+        color: white !important;
+      }
+      
+      .mat-mdc-list-item-title {
+        color: white !important;
+      }
+      
+      .mat-icon {
+        color: white !important;
+      }
+    }
+    
+    .nav-item {
+      .mdc-list-item__content,
+      .mat-mdc-list-item-title,
+      .mat-mdc-list-item-unscoped-content {
+        color: white !important;
+      }
+    }
+  }
+}

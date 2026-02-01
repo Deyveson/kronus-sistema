@@ -1,0 +1,293 @@
+<div class="clientes-container">
+  <app-sidebar></app-sidebar>
+  
+  <div class="main-content">
+    <header class="content-header">
+      <div class="search-bar">
+        <mat-icon>search</mat-icon>
+        <input type="text" placeholder="Buscar pacientes, agendamentos...">
+      </div>
+      
+      <div class="user-info">
+        <mat-icon class="notification-icon">notifications_none</mat-icon>
+        
+        <button mat-icon-button [matMenuTriggerFor]="userMenu" class="user-avatar">
+          <div class="avatar-circle">{{ userInitials }}</div>
+        </button>
+        
+        <mat-menu #userMenu="matMenu" class="user-menu">
+          <div class="user-menu-header">
+            <div class="avatar-circle large">{{ userInitials }}</div>
+            <div class="user-details">
+              <h4>{{ userName }}</h4>
+              <p>Admin</p>
+            </div>
+          </div>
+          
+          <button mat-menu-item (click)="goToProfile()">
+            <mat-icon>person</mat-icon>
+            <span>Meu Perfil</span>
+          </button>
+          
+          <button mat-menu-item (click)="logout()">
+            <mat-icon>logout</mat-icon>
+            <span>Sair</span>
+          </button>
+        </mat-menu>
+      </div>
+    </header>
+
+    <div class="content-body">
+      <div class="page-header">
+        <div class="header-info">
+          <h1>Clientes</h1>
+          <p>Gerencie todos os clientes da sua clínica</p>
+        </div>
+        <button class="btn-novo" (click)="novoCliente()">
+          <mat-icon>add</mat-icon>
+          Novo Cliente
+        </button>
+      </div>
+
+      <div class="filters-bar">
+        <div class="search-box">
+          <mat-icon>search</mat-icon>
+          <input
+            type="text"
+            placeholder="Buscar por nome, CPF ou email..."
+            [(ngModel)]="searchText"
+            class="filter-input"
+          />
+        </div>
+      </div>
+
+      <div class="filters-row">
+        <div class="filter-buttons">
+          <button
+            [class.active]="selectedFilter === 'todos'"
+            (click)="selectedFilter = 'todos'; onFilterChange()"
+            class="filter-btn"
+          >
+            Todos
+          </button>
+          <button
+            [class.active]="selectedFilter === 'ativos'"
+            (click)="selectedFilter = 'ativos'; onFilterChange()"
+            class="filter-btn"
+          >
+            Ativos
+          </button>
+          <button
+            [class.active]="selectedFilter === 'inativos'"
+            (click)="selectedFilter = 'inativos'; onFilterChange()"
+            class="filter-btn"
+          >
+            Inativos
+          </button>
+        </div>
+      </div>
+
+      <div class="clients-list">
+        <div *ngIf="loading" class="loading-container">
+          <mat-spinner diameter="50"></mat-spinner>
+          <p>Carregando clientes...</p>
+        </div>
+
+        <div *ngIf="!loading && clientesFiltrados.length > 0" class="list-container">
+          <div *ngFor="let cliente of clientesFiltrados" class="client-item">
+            <div class="item-left">
+              <div class="item-title-section">
+                <h3>{{ cliente.nome }}</h3>
+                <div class="item-badges">
+                  <span [class]="'status-badge ' + (cliente.ativo ? 'ativo' : 'inativo')">
+                    {{ cliente.ativo ? 'ATIVO' : 'INATIVO' }}
+                  </span>
+                </div>
+              </div>
+              <div class="item-details">
+                <div class="detail-item" *ngIf="cliente.cpf">
+                  <mat-icon>badge</mat-icon>
+                  <span>{{ cliente.cpf }}</span>
+                </div>
+                <div class="detail-separator" *ngIf="cliente.cpf">•</div>
+                <div class="detail-item">
+                  <mat-icon>phone</mat-icon>
+                  <span>{{ cliente.telefone }}</span>
+                </div>
+                <div class="detail-separator" *ngIf="cliente.email">•</div>
+                <div class="detail-item" *ngIf="cliente.email">
+                  <mat-icon>email</mat-icon>
+                  <span>{{ cliente.email }}</span>
+                </div>
+                <div class="detail-separator">•</div>
+                <div class="detail-item">
+                  <mat-icon>calendar_today</mat-icon>
+                  <span>Cadastrado em: {{ formatarData(cliente.criado_em) }}</span>
+                </div>
+              </div>
+            </div>
+            <div class="item-right">
+              <button 
+                class="status-badge-btn"
+                [class]="'status-badge-' + (cliente.ativo ? 'ativo' : 'inativo')"
+                (click)="toggleStatus(cliente)"
+              >
+                <mat-icon>{{ cliente.ativo ? 'toggle_on' : 'toggle_off' }}</mat-icon>
+                <span>{{ cliente.ativo ? 'ATIVO' : 'INATIVO' }}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div *ngIf="!loading && clientesFiltrados.length === 0" class="empty-state">
+          <mat-icon>people_outline</mat-icon>
+          <p>Nenhum cliente encontrado</p>
+          <button class="btn-novo" (click)="novoCliente()">
+            <mat-icon>add</mat-icon>
+            Adicionar Primeiro Cliente
+          </button>
+        </div>
+      </div>
+
+      <div class="footer-stats">
+        <div class="stat-item">
+          <span class="stat-label">Total de Clientes</span>
+          <span class="stat-value">{{ totalClientes }}</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Ativos</span>
+          <span class="stat-value ativo">{{ clientesAtivos }}</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Inativos</span>
+          <span class="stat-value inativo">{{ clientesInativos }}</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Consultas últimos 30 dias</span>
+          <span class="stat-value com-consulta">{{ clientesComConsulta }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dialog de Cadastro/Edição de Cliente -->
+  <div class="dialog-overlay" *ngIf="showDialog" (click)="closeDialog()">
+    <div class="dialog-container" (click)="$event.stopPropagation()">
+      <div class="dialog-header">
+        <h2>{{ dialogMode === 'create' ? 'Novo Cliente' : 'Editar Cliente' }}</h2>
+        <button class="close-btn" (click)="closeDialog()">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+
+      <form [formGroup]="clienteForm" (ngSubmit)="salvarCliente()">
+        <div class="dialog-body">
+          <div class="form-row">
+            <div class="form-group full-width">
+              <label for="nome">Nome Completo *</label>
+              <input
+                type="text"
+                id="nome"
+                formControlName="nome"
+                class="form-control"
+                placeholder="Digite o nome completo"
+              />
+              <span class="error-message" *ngIf="clienteForm.get('nome')?.invalid && clienteForm.get('nome')?.touched">
+                Nome é obrigatório (mínimo 3 caracteres)
+              </span>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="email">Email</label>
+              <input
+                type="email"
+                id="email"
+                formControlName="email"
+                class="form-control"
+                placeholder="exemplo@email.com"
+              />
+              <span class="error-message" *ngIf="clienteForm.get('email')?.invalid && clienteForm.get('email')?.touched">
+                Email inválido
+              </span>
+            </div>
+
+            <div class="form-group">
+              <label for="telefone">Telefone *</label>
+              <input
+                type="tel"
+                id="telefone"
+                formControlName="telefone"
+                class="form-control"
+                placeholder="(00) 00000-0000"
+              />
+              <span class="error-message" *ngIf="clienteForm.get('telefone')?.invalid && clienteForm.get('telefone')?.touched">
+                Telefone é obrigatório
+              </span>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="cpf">CPF</label>
+              <input
+                type="text"
+                id="cpf"
+                formControlName="cpf"
+                class="form-control"
+                placeholder="000.000.000-00"
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="data_nascimento">Data de Nascimento</label>
+              <input
+                type="date"
+                id="data_nascimento"
+                formControlName="data_nascimento"
+                class="form-control"
+              />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group full-width">
+              <label for="endereco">Endereço</label>
+              <input
+                type="text"
+                id="endereco"
+                formControlName="endereco"
+                class="form-control"
+                placeholder="Rua, número, bairro, cidade"
+              />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group full-width">
+              <label for="observacoes">Observações</label>
+              <textarea
+                id="observacoes"
+                formControlName="observacoes"
+                class="form-control"
+                rows="3"
+                placeholder="Anotações importantes sobre o cliente..."
+              ></textarea>
+            </div>
+          </div>
+        </div>
+
+        <div class="dialog-footer">
+          <button type="button" class="btn btn-secondary" (click)="closeDialog()">
+            Cancelar
+          </button>
+          <button type="submit" class="btn btn-primary" [disabled]="salvando || clienteForm.invalid">
+            <mat-spinner *ngIf="salvando" diameter="20"></mat-spinner>
+            {{ salvando ? 'Salvando...' : (dialogMode === 'create' ? 'Criar Cliente' : 'Salvar Alterações') }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

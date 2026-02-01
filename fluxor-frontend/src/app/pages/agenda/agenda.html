@@ -1,0 +1,305 @@
+<div class="agenda-container">
+  <app-sidebar></app-sidebar>
+  
+  <div class="main-content">
+    <header class="content-header">
+      <div class="search-bar">
+        <mat-icon>search</mat-icon>
+        <input type="text" placeholder="Buscar pacientes, agendamentos...">
+      </div>
+      
+      <div class="user-info">
+        <mat-icon class="notification-icon">notifications_none</mat-icon>
+        
+        <button mat-icon-button [matMenuTriggerFor]="userMenu" class="user-avatar">
+          <div class="avatar-circle">{{ userInitials }}</div>
+        </button>
+        
+        <mat-menu #userMenu="matMenu" class="user-menu">
+          <div class="user-menu-header">
+            <div class="avatar-circle large">{{ userInitials }}</div>
+            <div class="user-details">
+              <h4>{{ userName }}</h4>
+              <p>Admin</p>
+            </div>
+          </div>
+          
+          <button mat-menu-item (click)="goToProfile()">
+            <mat-icon>person</mat-icon>
+            <span>Meu Perfil</span>
+          </button>
+          
+          <button mat-menu-item (click)="logout()">
+            <mat-icon>logout</mat-icon>
+            <span>Sair</span>
+          </button>
+        </mat-menu>
+      </div>
+    </header>
+
+    <div class="content-body">
+      <!-- Toolbar da Agenda -->
+      <div class="agenda-toolbar">
+        <div class="toolbar-left">
+          <div class="date-picker-group">
+            <input type="date" 
+                   [value]="selectedDate | date:'yyyy-MM-dd'" 
+                   (change)="onDateChange($event)"
+                   class="date-input">
+            <select class="professional-select" 
+                    [(ngModel)]="selectedProfessional"
+                    (change)="onProfissionalChange()">
+              <option value="todos">Todos</option>
+              <option *ngFor="let prof of profissionais" [value]="prof.id">{{ prof.nome }}</option>
+            </select>
+          </div>
+
+          <div class="view-toggle">
+            <button 
+              [class.active]="selectedView === 'day'" 
+              (click)="setView('day')"
+              class="toggle-btn">
+              <mat-icon>calendar_view_day</mat-icon>
+              Dia
+            </button>
+            <button 
+              [class.active]="selectedView === 'week'" 
+              (click)="setView('week')"
+              class="toggle-btn">
+              <mat-icon>calendar_view_week</mat-icon>
+              Semana
+            </button>
+          </div>
+        </div>
+
+        <div class="toolbar-right">
+          <button class="action-btn primary" (click)="newAppointment()">
+            <mat-icon>add</mat-icon>
+            Novo Agendamento
+          </button>
+          <button class="action-btn secondary" (click)="recoverSchedule()">
+            <mat-icon>restore</mat-icon>
+            Recuperar Horário
+          </button>
+        </div>
+      </div>
+
+      <!-- Navegação de Data -->
+      <div class="date-navigation">
+        <button class="nav-btn" (click)="changeDate(-1)">
+          <mat-icon>chevron_left</mat-icon>
+        </button>
+        
+        <div class="date-display">
+          {{ formatDate(selectedDate) }}
+        </div>
+        
+        <button class="nav-btn" (click)="changeDate(1)">
+          <mat-icon>chevron_right</mat-icon>
+        </button>
+        
+        <button class="today-btn" (click)="goToToday()">
+          Hoje
+        </button>
+      </div>
+
+      <!-- Grid de Agenda -->
+      <div class="calendar-grid" *ngIf="!loading">
+        <!-- Header com profissionais (Visualização DIA) -->
+        <div class="calendar-header" *ngIf="selectedView === 'day'">
+          <div class="time-column-header">SEMANA</div>
+          <div class="professionals-header">
+            <div class="professional-column" *ngFor="let prof of profissionaisFiltrados">
+              <div class="professional-info">
+                <strong>{{ prof.nome }}</strong>
+                <span>{{ prof.especialidade }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Header com dias da semana (Visualização SEMANA) -->
+        <div class="calendar-header" *ngIf="selectedView === 'week'">
+          <div class="time-column-header">Horário</div>
+          <div class="week-days-header">
+            <div class="week-day-column" *ngFor="let day of getWeekDays()" [class.today]="isToday(day)">
+              <div class="week-day-info">
+                <strong>{{ getDayName(day) }}</strong>
+                <span class="day-number">{{ getDayNumber(day) }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Grid com horários (Visualização DIA) -->
+        <div class="calendar-body" *ngIf="selectedView === 'day'">
+          <!-- Coluna de horários -->
+          <div class="time-column">
+            <div class="time-slot" *ngFor="let slot of timeSlots">
+              {{ slot.time }}
+            </div>
+          </div>
+
+          <!-- Grid de agendamentos por profissional -->
+          <div class="appointments-grid">
+            <div class="professional-column" *ngFor="let prof of profissionaisFiltrados">
+              <!-- Grid lines -->
+              <div class="grid-lines">
+                <div class="grid-line" *ngFor="let slot of timeSlots"></div>
+              </div>
+              
+              <!-- Agendamentos -->
+              <div class="appointments-container">
+                <div 
+                  class="appointment-block"
+                  *ngFor="let apt of getAppointmentsForProfessional(prof.id)"
+                  (click)="editarAgendamento(apt)"
+                  [ngStyle]="getAppointmentStyle(apt)"
+                  [style.background-color]="getAppointmentColor(apt).background"
+                  [style.color]="getAppointmentColor(apt).color"
+                  [class.blocked]="false"
+                  [class.cancelado]="apt.status === 'cancelado'">
+                  <div class="appointment-content">
+                    <strong>{{ apt.cliente_nome }}</strong>
+                    <span class="time">{{ getAppointmentTimeRange(apt) }}</span>
+                    <span class="patient" *ngIf="apt.servico_nome">{{ apt.servico_nome }}</span>
+                    <span class="type" *ngIf="apt.profissional_nome">{{ apt.profissional_nome }}</span>
+                    <span class="status-badge" *ngIf="apt.status !== 'agendado'">{{ apt.status.toUpperCase() }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Grid com horários (Visualização SEMANA) -->
+        <div class="calendar-body" *ngIf="selectedView === 'week'">
+          <!-- Coluna de horários -->
+          <div class="time-column">
+            <div class="time-slot" *ngFor="let slot of timeSlots">
+              {{ slot.time }}
+            </div>
+          </div>
+
+          <!-- Grid de agendamentos por dia da semana -->
+          <div class="week-grid">
+            <div class="week-day-column" *ngFor="let day of getWeekDays()" [class.today]="isToday(day)">
+              <!-- Grid lines -->
+              <div class="grid-lines">
+                <div class="grid-line" *ngFor="let slot of timeSlots"></div>
+              </div>
+              
+              <!-- Agendamentos do dia -->
+              <div class="appointments-container">
+                <div 
+                  class="appointment-block"
+                  *ngFor="let apt of getAppointmentsForDay(day)"
+                  (click)="editarAgendamento(apt)"
+                  [ngStyle]="getAppointmentStyle(apt)"
+                  [style.background-color]="getAppointmentColor(apt).background"
+                  [style.color]="getAppointmentColor(apt).color"
+                  [class.blocked]="false"
+                  [class.cancelado]="apt.status === 'cancelado'">
+                  <div class="appointment-content">
+                    <strong>{{ apt.cliente_nome }}</strong>
+                    <span class="time">{{ getAppointmentTimeRange(apt) }}</span>
+                    <span class="patient" *ngIf="apt.servico_nome">{{ apt.servico_nome }}</span>
+                    <span class="type" *ngIf="apt.profissional_nome">{{ apt.profissional_nome }}</span>
+                    <span class="status-badge" *ngIf="apt.status !== 'agendado'">{{ apt.status.toUpperCase() }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Loading Spinner -->
+      <div *ngIf="loading" class="loading-container">
+        <mat-spinner diameter="50"></mat-spinner>
+        <p>Carregando agendamentos...</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dialog de Novo/Editar Agendamento -->
+  <div class="dialog-overlay" *ngIf="showDialog" (click)="closeDialog()">
+    <div class="dialog-container" (click)="$event.stopPropagation()">
+      <div class="dialog-header">
+        <h2>{{ dialogMode === 'create' ? 'Novo Agendamento' : 'Editar Agendamento' }}</h2>
+        <button class="close-btn" (click)="closeDialog()">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+
+      <div class="dialog-body">
+        <div class="form-group">
+          <label for="cliente">Cliente *</label>
+          <select id="cliente" [(ngModel)]="dialogData.cliente_id" class="form-control">
+            <option value="">Selecione um cliente</option>
+            <option *ngFor="let cliente of clientes" [value]="cliente.id">
+              {{ cliente.nome }}
+            </option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="servico">Serviço *</label>
+          <select id="servico" [(ngModel)]="dialogData.servico_id" class="form-control">
+            <option value="">Selecione um serviço</option>
+            <option *ngFor="let servico of servicos" [value]="servico.id">
+              {{ servico.nome }} - {{ servico.duracao }}min
+            </option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="profissional">Profissional *</label>
+          <select id="profissional" [(ngModel)]="dialogData.profissional_id" class="form-control">
+            <option value="">Selecione um profissional</option>
+            <option *ngFor="let prof of profissionais" [value]="prof.id">
+              {{ prof.nome }} - {{ prof.especialidade }}
+            </option>
+          </select>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="data">Data *</label>
+            <input type="date" id="data" [(ngModel)]="dialogData.data" class="form-control">
+          </div>
+
+          <div class="form-group">
+            <label for="hora">Hora *</label>
+            <input type="time" id="hora" [(ngModel)]="dialogData.hora" class="form-control">
+          </div>
+        </div>
+
+        <div class="form-group" *ngIf="dialogMode === 'edit'">
+          <label for="status">Status *</label>
+          <select id="status" [(ngModel)]="dialogData.status" class="form-control">
+            <option *ngFor="let status of statusOptions" [value]="status.value">
+              {{ status.label }}
+            </option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="observacoes">Observações</label>
+          <textarea id="observacoes" [(ngModel)]="dialogData.observacoes" class="form-control" rows="3"></textarea>
+        </div>
+      </div>
+
+      <div class="dialog-footer">
+        <button class="btn btn-secondary" (click)="closeDialog()">Cancelar</button>
+        <button class="btn btn-danger" *ngIf="dialogMode === 'edit' && dialogData.status !== 'cancelado'" (click)="cancelarAgendamento()" [disabled]="loading">
+          Cancelar Agendamento
+        </button>
+        <button class="btn btn-primary" (click)="salvarAgendamento()" [disabled]="loading">
+          <mat-spinner *ngIf="loading" diameter="20"></mat-spinner>
+          {{ loading ? 'Salvando...' : (dialogMode === 'create' ? 'Criar Agendamento' : 'Atualizar Agendamento') }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

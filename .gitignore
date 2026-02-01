@@ -1,0 +1,47 @@
+# Dependencies
+node_modules/
+__pycache__/
+*.pyc
+.pyo
+.pyd
+
+# Build outputs
+dist/
+build/
+*.egg-info/
+
+# Environment
+.env
+.env.local
+*.env
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Python
+venv/
+.venv/
+*.egg
+.eggs/
+
+# Angular
+.angular/
+
+# Docker volumes (local)
+mongo-data/
+
+# Temporary files
+tmp/
+temp/
+*.tmp

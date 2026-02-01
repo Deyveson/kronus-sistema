@@ -1,0 +1,39 @@
+<div class="sidebar-container">
+  <div class="sidebar-header">
+    <div class="clinic-info">
+      <img src="assets/images/kronus-logo-dark.png" alt="KRONUS" class="clinic-logo" />
+      <div class="clinic-details">
+        <h3>KRONUS</h3>
+        <p>Sistema de Gestão</p>
+      </div>
+    </div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <mat-nav-list>
+      <a
+        mat-list-item
+        *ngFor="let item of menuItems"
+        [routerLink]="item.route"
+        routerLinkActive="active"
+        class="nav-item"
+      >
+        <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
+        <span matListItemTitle>{{ item.label }}</span>
+      </a>
+    </mat-nav-list>
+  </nav>
+
+  <div class="sidebar-footer">
+    <mat-nav-list>
+      <a
+        mat-list-item
+        (click)="abrirConfiguracoes()"
+        class="nav-item"
+      >
+        <mat-icon matListItemIcon>settings</mat-icon>
+        <span matListItemTitle>Configurações</span>
+      </a>
+    </mat-nav-list>
+  </div>
+</div>

@@ -1,0 +1,285 @@
+<div class="profissionais-container">
+  <app-sidebar></app-sidebar>
+
+  <div class="main-content">
+    <header class="content-header">
+      <div class="search-bar">
+        <mat-icon>search</mat-icon>
+        <input type="text" placeholder="Buscar pacientes, agendamentos...">
+      </div>
+      
+      <div class="user-info">
+        <mat-icon class="notification-icon">notifications_none</mat-icon>
+        
+        <button mat-icon-button [matMenuTriggerFor]="userMenu" class="user-avatar">
+          <div class="avatar-circle">{{ userInitials }}</div>
+        </button>
+        
+        <mat-menu #userMenu="matMenu" class="user-menu">
+          <div class="user-menu-header">
+            <div class="avatar-circle large">{{ userInitials }}</div>
+            <div class="user-details">
+              <h4>{{ userName }}</h4>
+              <p>Admin</p>
+            </div>
+          </div>
+          
+          <button mat-menu-item (click)="goToProfile()">
+            <mat-icon>person</mat-icon>
+            <span>Meu Perfil</span>
+          </button>
+          
+          <button mat-menu-item (click)="logout()">
+            <mat-icon>logout</mat-icon>
+            <span>Sair</span>
+          </button>
+        </mat-menu>
+      </div>
+    </header>
+
+    <div class="content-body">
+      <div class="page-header">
+        <div class="header-info">
+          <h1>Profissionais</h1>
+          <p>Gerencie profissionais, especialidades, serviços e disponibilidade para agendamentos</p>
+        </div>
+        <button class="btn-novo" (click)="novoProfissional()">
+          <mat-icon>add</mat-icon>
+          Novo Profissional
+        </button>
+      </div>
+
+      <div class="filters-bar">
+        <div class="search-box">
+          <mat-icon>search</mat-icon>
+          <input
+            type="text"
+            placeholder="Buscar por nome do profissional..."
+            [(ngModel)]="searchText"
+            class="filter-input"
+          />
+        </div>
+        <div class="category-select">
+          <select [(ngModel)]="selectedEspecialidade" class="select-input">
+            <option *ngFor="let esp of especialidades" [value]="esp.value">
+              {{ esp.label }}
+            </option>
+          </select>
+          <mat-icon>arrow_drop_down</mat-icon>
+        </div>
+      </div>
+
+      <div class="filters-row">
+        <div class="filter-buttons">
+          <button
+            [class.active]="selectedFilter === 'todos'"
+            (click)="selectedFilter = 'todos'"
+            class="filter-btn"
+          >
+            Todos
+          </button>
+          <button
+            [class.active]="selectedFilter === 'ativos'"
+            (click)="selectedFilter = 'ativos'"
+            class="filter-btn"
+          >
+            Ativos
+          </button>
+          <button
+            [class.active]="selectedFilter === 'inativos'"
+            (click)="selectedFilter = 'inativos'"
+            class="filter-btn"
+          >
+            Inativos
+          </button>
+        </div>
+      </div>
+
+      <div class="professionals-list">
+        <div *ngIf="profissionaisFiltrados.length > 0" class="list-container">
+          <div *ngFor="let professional of profissionaisFiltrados" class="professional-item">
+            <div class="item-left">
+              <div class="item-title-section">
+                <h3>{{ professional.nome }}</h3>
+                <div class="item-badges">
+                  <span [class]="'status-badge ' + (professional.ativo ? 'ativo' : 'inativo')">
+                    {{ professional.ativo ? 'ATIVO' : 'INATIVO' }}
+                  </span>
+                  <span *ngIf="professional.acesso_sistema" class="acesso-badge">
+                    <mat-icon>check_circle</mat-icon>
+                    Acesso ao sistema
+                  </span>
+                </div>
+              </div>
+              <div class="item-details">
+                <div class="detail-item">
+                  <mat-icon>stethoscope</mat-icon>
+                  <span>{{ professional.especialidade }}</span>
+                </div>
+                <div class="detail-separator">•</div>
+                <div class="detail-item">
+                  <mat-icon>phone</mat-icon>
+                  <span>{{ professional.telefone }}</span>
+                </div>
+                <div class="detail-separator">•</div>
+                <div class="detail-item">
+                  <mat-icon>email</mat-icon>
+                  <span>{{ professional.email }}</span>
+                </div>
+              </div>
+            </div>
+            <div class="item-right">
+              <button 
+                class="status-badge-btn"
+                [class]="'status-badge-' + (professional.ativo ? 'ativo' : 'inativo')"
+                (click)="toggleStatus(professional)"
+              >
+                <mat-icon>{{ professional.ativo ? 'toggle_on' : 'toggle_off' }}</mat-icon>
+                <span>{{ professional.ativo ? 'ATIVO' : 'INATIVO' }}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div *ngIf="profissionaisFiltrados.length === 0" class="empty-state">
+          <mat-icon>person_off</mat-icon>
+          <p>Nenhum profissional encontrado</p>
+        </div>
+      </div>
+
+      <div class="footer-stats">
+        <div class="stat-item">
+          <span class="stat-label">Total de Profissionais</span>
+          <span class="stat-value">{{ totalProfissionais }}</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Ativos</span>
+          <span class="stat-value ativo">{{ profissionaisAtivos }}</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Inativos</span>
+          <span class="stat-value inativo">{{ profissionaisInativos }}</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Sem Acesso ao Sistema</span>
+          <span class="stat-value sem-prof">{{ profissionaisSemAcesso }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dialog de Cadastro/Edição de Profissional -->
+  <div class="dialog-overlay" *ngIf="showDialog" (click)="closeDialog()">
+    <div class="dialog-container" (click)="$event.stopPropagation()">
+      <div class="dialog-header">
+        <h2>{{ dialogMode === 'create' ? 'Novo Profissional' : 'Editar Profissional' }}</h2>
+        <button class="close-btn" (click)="closeDialog()">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+
+      <form [formGroup]="profissionalForm" (ngSubmit)="salvarProfissional()">
+        <div class="dialog-body">
+          <div class="form-row">
+            <div class="form-group full-width">
+              <label for="nome">Nome Completo *</label>
+              <input
+                type="text"
+                id="nome"
+                formControlName="nome"
+                class="form-control"
+                placeholder="Digite o nome completo"
+              />
+              <span class="error-message" *ngIf="profissionalForm.get('nome')?.invalid && profissionalForm.get('nome')?.touched">
+                Nome é obrigatório (mínimo 3 caracteres)
+              </span>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="especialidade">Especialidade *</label>
+              <input
+                type="text"
+                id="especialidade"
+                formControlName="especialidade"
+                class="form-control"
+                placeholder="Ex: Psicólogo, Nutricionista..."
+              />
+              <span class="error-message" *ngIf="profissionalForm.get('especialidade')?.invalid && profissionalForm.get('especialidade')?.touched">
+                Especialidade é obrigatória
+              </span>
+            </div>
+
+            <div class="form-group">
+              <label for="registro_profissional">Registro Profissional</label>
+              <input
+                type="text"
+                id="registro_profissional"
+                formControlName="registro_profissional"
+                class="form-control"
+                placeholder="CRP, CRN, etc."
+              />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="telefone">Telefone *</label>
+              <input
+                type="tel"
+                id="telefone"
+                formControlName="telefone"
+                class="form-control"
+                placeholder="(00) 00000-0000"
+              />
+              <span class="error-message" *ngIf="profissionalForm.get('telefone')?.invalid && profissionalForm.get('telefone')?.touched">
+                Telefone é obrigatório
+              </span>
+            </div>
+
+            <div class="form-group">
+              <label for="email">Email</label>
+              <input
+                type="email"
+                id="email"
+                formControlName="email"
+                class="form-control"
+                placeholder="exemplo@email.com"
+              />
+              <span class="error-message" *ngIf="profissionalForm.get('email')?.invalid && profissionalForm.get('email')?.touched">
+                Email inválido
+              </span>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group full-width">
+              <label class="checkbox-label">
+                <input
+                  type="checkbox"
+                  formControlName="acesso_sistema"
+                  class="checkbox-input"
+                />
+                <span>Permitir acesso ao sistema</span>
+              </label>
+              <small class="help-text">
+                O profissional poderá fazer login e gerenciar seus próprios agendamentos
+              </small>
+            </div>
+          </div>
+        </div>
+
+        <div class="dialog-footer">
+          <button type="button" class="btn btn-secondary" (click)="closeDialog()">
+            Cancelar
+          </button>
+          <button type="submit" class="btn btn-primary" [disabled]="salvando || profissionalForm.invalid">
+            <mat-spinner *ngIf="salvando" diameter="20"></mat-spinner>
+            {{ salvando ? 'Salvando...' : (dialogMode === 'create' ? 'Criar Profissional' : 'Salvar Alterações') }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

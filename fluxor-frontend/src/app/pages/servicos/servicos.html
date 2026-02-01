@@ -1,0 +1,295 @@
+<div class="servicos-container">
+  <app-sidebar></app-sidebar>
+
+  <div class="main-content">
+    <header class="content-header">
+      <div class="search-bar">
+        <mat-icon>search</mat-icon>
+        <input type="text" placeholder="Buscar pacientes, agendamentos...">
+      </div>
+      
+      <div class="user-info">
+        <mat-icon class="notification-icon">notifications_none</mat-icon>
+        
+        <button mat-icon-button [matMenuTriggerFor]="userMenu" class="user-avatar">
+          <div class="avatar-circle">{{ userInitials }}</div>
+        </button>
+        
+        <mat-menu #userMenu="matMenu" class="user-menu">
+          <div class="user-menu-header">
+            <div class="avatar-circle large">{{ userInitials }}</div>
+            <div class="user-details">
+              <h4>{{ userName }}</h4>
+              <p>Admin</p>
+            </div>
+          </div>
+          
+          <button mat-menu-item (click)="goToProfile()">
+            <mat-icon>person</mat-icon>
+            <span>Meu Perfil</span>
+          </button>
+          
+          <button mat-menu-item (click)="logout()">
+            <mat-icon>logout</mat-icon>
+            <span>Sair</span>
+          </button>
+        </mat-menu>
+      </div>
+    </header>
+
+    <div class="content-body">
+      <div class="page-header">
+        <div class="header-info">
+          <h1>Serviços</h1>
+          <p>Gerencie os serviços oferecidos, duração, preços e profissionais habilitados</p>
+        </div>
+        <button class="btn-novo" (click)="novoServico()">
+          <mat-icon>add</mat-icon>
+          Novo Serviço
+        </button>
+      </div>
+
+      <div class="info-card">
+        <div class="info-header">
+          <mat-icon>info</mat-icon>
+          <h3>Serviço como Elemento Central</h3>
+        </div>
+        <p>O serviço define duração, profissionais habilitados e controla toda a lógica de agendamento e agenda.</p>
+      </div>
+
+      <div class="filters-bar">
+        <div class="search-box">
+          <mat-icon>search</mat-icon>
+          <input
+            type="text"
+            placeholder="Buscar por nome do serviço..."
+            [(ngModel)]="searchText"
+            class="filter-input"
+          />
+        </div>
+        <div class="category-select">
+          <select [(ngModel)]="selectedCategory" class="select-input">
+            <option *ngFor="let cat of categories" [value]="cat.value">
+              {{ cat.label }}
+            </option>
+          </select>
+          <mat-icon>arrow_drop_down</mat-icon>
+        </div>
+      </div>
+
+      <div class="filters-row">
+        <div class="filter-buttons">
+          <button
+            [class.active]="selectedFilter === 'todos'"
+            (click)="selectedFilter = 'todos'"
+            class="filter-btn"
+          >
+            Todos
+          </button>
+          <button
+            [class.active]="selectedFilter === 'ativos'"
+            (click)="selectedFilter = 'ativos'"
+            class="filter-btn"
+          >
+            Ativos
+          </button>
+          <button
+            [class.active]="selectedFilter === 'inativos'"
+            (click)="selectedFilter = 'inativos'"
+            class="filter-btn"
+          >
+            Inativos
+          </button>
+        </div>
+      </div>
+
+      <div class="services-list">
+        <div *ngIf="servicosFiltrados.length > 0" class="list-container">
+          <div *ngFor="let service of servicosFiltrados" class="service-item">
+            <div class="item-left">
+              <div class="item-title-section">
+                <h3>{{ service.nome }}</h3>
+                <div class="item-badges">
+                  <span [class]="'tipo-badge ' + getTipoBadgeColor(service.tipo)">
+                    {{ service.tipo }}
+                  </span>
+                  <span [class]="'status-badge ' + service.status">
+                    {{ service.status | uppercase }}
+                  </span>
+                </div>
+              </div>
+              <div class="item-details">
+                <div class="detail-item">
+                  <mat-icon>schedule</mat-icon>
+                  <span>{{ service.duracao }} min</span>
+                </div>
+                <div class="detail-separator">•</div>
+                <div class="detail-item">
+                  <span class="price">R$ {{ service.preco | number: '1.2-2' }}</span>
+                </div>
+                <div class="detail-separator">•</div>
+                <div class="detail-item">
+                  <mat-icon>people</mat-icon>
+                  <span>{{ service.profissionais }} profissional(is) habilitado(s)</span>
+                </div>
+                <div class="detail-separator">•</div>
+                <span class="descricao">{{ service.descricao }}</span>
+              </div>
+            </div>
+            <div class="item-right">
+              <button 
+                class="status-badge-btn"
+                [class]="service.ativo ? 'status-badge-ativo' : 'status-badge-inativo'"
+                (click)="toggleStatus(service)"
+              >
+                <mat-icon>{{ service.ativo ? 'toggle_on' : 'toggle_off' }}</mat-icon>
+                <span>{{ service.ativo ? 'ATIVO' : 'INATIVO' }}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div *ngIf="servicosFiltrados.length === 0" class="empty-state">
+          <mat-icon>miscellaneous_services</mat-icon>
+          <p>Nenhum serviço encontrado</p>
+        </div>
+      </div>
+
+      <div class="footer-stats">
+        <div class="stat-item">
+          <span class="stat-label">Total de Serviços</span>
+          <span class="stat-value">{{ totalServicos }}</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Ativos</span>
+          <span class="stat-value ativo">{{ servicosAtivos }}</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Inativos</span>
+          <span class="stat-value inativo">{{ servicosInativos }}</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Sem Profissionais</span>
+          <span class="stat-value sem-prof">{{ servicosSemProfissionais }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dialog de Cadastro/Edição de Serviço -->
+  <div class="dialog-overlay" *ngIf="showDialog" (click)="closeDialog()">
+    <div class="dialog-container" (click)="$event.stopPropagation()">
+      <div class="dialog-header">
+        <h2>{{ dialogMode === 'create' ? 'Novo Serviço' : 'Editar Serviço' }}</h2>
+        <button class="close-btn" (click)="closeDialog()">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+
+      <form [formGroup]="servicoForm" (ngSubmit)="salvarServico()">
+        <div class="dialog-body">
+          <div class="form-row">
+            <div class="form-group full-width">
+              <label for="nome">Nome do Serviço *</label>
+              <input
+                type="text"
+                id="nome"
+                formControlName="nome"
+                class="form-control"
+                placeholder="Ex: Consulta Psicológica"
+              />
+              <span class="error-message" *ngIf="servicoForm.get('nome')?.invalid && servicoForm.get('nome')?.touched">
+                Nome é obrigatório (mínimo 3 caracteres)
+              </span>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="tipo">Tipo *</label>
+              <select
+                id="tipo"
+                formControlName="tipo"
+                class="form-control"
+              >
+                <option *ngFor="let tipo of tiposServico" [value]="tipo">{{ tipo }}</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="duracao">Duração (minutos) *</label>
+              <input
+                type="number"
+                id="duracao"
+                formControlName="duracao"
+                class="form-control"
+                placeholder="30"
+                min="5"
+              />
+              <span class="error-message" *ngIf="servicoForm.get('duracao')?.invalid && servicoForm.get('duracao')?.touched">
+                Duração mínima: 5 minutos
+              </span>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="valor">Valor (R$) *</label>
+              <input
+                type="number"
+                id="valor"
+                formControlName="valor"
+                class="form-control"
+                placeholder="0.00"
+                step="0.01"
+                min="0"
+              />
+              <span class="error-message" *ngIf="servicoForm.get('valor')?.invalid && servicoForm.get('valor')?.touched">
+                Valor é obrigatório
+              </span>
+            </div>
+
+            <div class="form-group">
+              <label for="profissionais_habilitados">Profissionais Habilitados</label>
+              <select
+                id="profissionais_habilitados"
+                formControlName="profissionais_habilitados"
+                class="form-control"
+                multiple
+                size="4"
+              >
+                <option *ngFor="let prof of profissionais" [value]="prof.id">
+                  {{ prof.nome }} - {{ prof.especialidade }}
+                </option>
+              </select>
+              <small class="help-text">Segure Ctrl para selecionar múltiplos</small>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group full-width">
+              <label for="descricao">Descrição</label>
+              <textarea
+                id="descricao"
+                formControlName="descricao"
+                class="form-control"
+                rows="3"
+                placeholder="Descrição detalhada do serviço..."
+              ></textarea>
+            </div>
+          </div>
+        </div>
+
+        <div class="dialog-footer">
+          <button type="button" class="btn btn-secondary" (click)="closeDialog()">
+            Cancelar
+          </button>
+          <button type="submit" class="btn btn-primary" [disabled]="salvando || servicoForm.invalid">
+            <mat-spinner *ngIf="salvando" diameter="20"></mat-spinner>
+            {{ salvando ? 'Salvando...' : (dialogMode === 'create' ? 'Criar Serviço' : 'Salvar Alterações') }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

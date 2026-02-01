@@ -1,0 +1,87 @@
+<div class="modal-container">
+  <div class="modal-header">
+    <div class="header-icon">
+      <mat-icon>link</mat-icon>
+    </div>
+    <div class="header-content">
+      <h2>Link do Cliente</h2>
+      <p>Compartilhe o link de agendamento online</p>
+    </div>
+    <button mat-icon-button class="close-btn" (click)="fechar()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <div class="modal-body">
+    <div class="cliente-info">
+      <p class="label">Cliente:</p>
+      <p class="cliente-nome">{{ data.clienteNome }}</p>
+    </div>
+
+    <div class="link-section">
+      <p class="section-title">Seu link de agendamento:</p>
+      <div class="link-box">
+        <span class="link-text">{{ data.link }}</span>
+        <button mat-button class="copy-btn" (click)="copiarLink()">
+          <mat-icon>content_copy</mat-icon>
+          <span>Copiar</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="acoes-rapidas">
+      <p class="section-title">Ações Rápidas:</p>
+      <div class="action-buttons">
+        <button mat-raised-button class="action-btn open-link" (click)="abrirLink()">
+          <mat-icon>open_in_new</mat-icon>
+          <div class="btn-content">
+            <span class="btn-title">Abrir Link</span>
+            <span class="btn-subtitle">Visualizar página</span>
+          </div>
+        </button>
+
+        <button mat-raised-button class="action-btn whatsapp" (click)="compartilharWhatsApp()">
+          <mat-icon>chat</mat-icon>
+          <div class="btn-content">
+            <span class="btn-title">WhatsApp</span>
+            <span class="btn-subtitle">Compartilhar</span>
+          </div>
+        </button>
+
+        <button mat-raised-button class="action-btn qrcode" (click)="gerarQRCode()">
+          <mat-icon>qr_code_2</mat-icon>
+          <div class="btn-content">
+            <span class="btn-title">QR Code</span>
+            <span class="btn-subtitle">Gerar código</span>
+          </div>
+        </button>
+      </div>
+    </div>
+
+    <div class="info-section">
+      <p class="section-title">Como funciona?</p>
+      <ul class="info-list">
+        <li>
+          <mat-icon>check_circle</mat-icon>
+          <span>Compartilhe este link com seus clientes via WhatsApp, redes sociais ou site</span>
+        </li>
+        <li>
+          <mat-icon>check_circle</mat-icon>
+          <span>O cliente agenda de forma simples e segura pelo navegador</span>
+        </li>
+        <li>
+          <mat-icon>check_circle</mat-icon>
+          <span>O agendamento é criado automaticamente na sua agenda</span>
+        </li>
+        <li>
+          <mat-icon>check_circle</mat-icon>
+          <span>Confirmação é enviada automaticamente por WhatsApp</span>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="modal-footer">
+    <button mat-button (click)="fechar()">Fechar</button>
+  </div>
+</div>

@@ -1,0 +1,328 @@
+
+// Include theming for Angular Material with `mat.theme()`.
+// This Sass mixin will define CSS variables that are used for styling Angular Material
+// components according to the Material 3 design spec.
+// Learn more about theming and how to use it for your application's
+// custom components at https://material.angular.dev/guide/theming
+@use '@angular/material' as mat;
+
+// Paleta de cores KRONUS
+$kronus-pink: #ec4899;
+$kronus-purple: #8b5cf6;
+$kronus-blue: #3b82f6;
+$kronus-green: #10b981;
+
+html {
+  height: 100%;
+  @include mat.theme((
+    color: (
+      primary: mat.$azure-palette,
+      tertiary: mat.$blue-palette,
+    ),
+    typography: Roboto,
+    density: 0,
+  ));
+}
+
+body {
+  // Default the application to a light color theme. This can be changed to
+  // `dark` to enable the dark color theme, or to `light dark` to defer to the
+  // user's system settings.
+  color-scheme: light;
+
+  // Set a default background, font and text colors for the application using
+  // Angular Material's system-level CSS variables. Learn more about these
+  // variables at https://material.angular.dev/guide/system-variables
+  background-color: var(--mat-sys-surface);
+  color: var(--mat-sys-on-surface);
+  font: var(--mat-sys-body-medium);
+
+  // Reset the user agent margin.
+  margin: 0;
+  height: 100%;
+  
+  // Transição suave ao trocar tema
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+// ==============================
+// TEMA ESCURO - GLOBAL
+// ==============================
+body.dark-theme {
+  color-scheme: dark;
+  background-color: #1e293b !important;
+  
+  // Aplicar fundo escuro a toda a aplicação
+  .dashboard-container,
+  .clientes-container,
+  .profissionais-container,
+  .servicos-container,
+  .agenda-container,
+  .lista-espera-container,
+  .relatorios-container {
+    background-color: #1e293b;
+  }
+  
+  .main-content {
+    background-color: #1e293b !important;
+  }
+  
+  .content-header {
+    background: #1e293b !important;
+    border-bottom: 1px solid #334155;
+  }
+  
+  .search-bar {
+    background: #334155 !important;
+    
+    input {
+      color: #e2e8f0 !important;
+      
+      &::placeholder {
+        color: #94a3b8 !important;
+      }
+    }
+    
+    mat-icon {
+      color: #94a3b8 !important;
+    }
+  }
+  
+  .content-body {
+    background-color: #1e293b !important;
+  }
+  
+  .welcome-message {
+    h1 {
+      color: #f1f5f9 !important;
+    }
+    
+    p {
+      color: #94a3b8 !important;
+    }
+  }
+  
+  .filters-section {
+    background: #0f172a !important;
+    
+    label {
+      color: #94a3b8 !important;
+    }
+    
+    .filter-select {
+      background: #334155 !important;
+      color: #e2e8f0 !important;
+      border-color: #475569 !important;
+    }
+  }
+  
+  .stat-card {
+    background: #1e293b !important;
+    
+    .stat-info {
+      h3 {
+        color: #f1f5f9 !important;
+      }
+      
+      p {
+        color: #94a3b8 !important;
+      }
+    }
+  }
+  
+  .quick-stats h2,
+  .quick-actions h2,
+  .revenue-chart h2,
+  .recent-activities h2,
+  .upcoming-appointments h2 {
+    color: #f1f5f9 !important;
+  }
+  
+  .revenue-chart,
+  .recent-activities,
+  .upcoming-appointments {
+    background: #1e293b !important;
+    
+    .chart-legend .legend-item {
+      color: #94a3b8 !important;
+    }
+  }
+  
+  .activity-item {
+    background: #334155 !important;
+    
+    .activity-title {
+      color: #f1f5f9 !important;
+    }
+    
+    .activity-subtitle,
+    .activity-time {
+      color: #94a3b8 !important;
+    }
+  }
+  
+  .appointment-card {
+    background: #334155 !important;
+    border-color: #475569 !important;
+    
+    .appointment-info {
+      h4 {
+        color: #f1f5f9 !important;
+      }
+      
+      p {
+        color: #94a3b8 !important;
+      }
+    }
+    
+    .appointment-time {
+      background: #475569 !important;
+      
+      mat-icon {
+        color: #94a3b8 !important;
+      }
+      
+      span {
+        color: #f1f5f9 !important;
+        
+        &.date {
+          color: #94a3b8 !important;
+        }
+      }
+    }
+  }
+  
+  // View all link
+  .view-all {
+    color: #ec4899 !important;
+  }
+  
+  // Sidebar escuro
+  .sidebar-container {
+    background: #1e293b !important;
+  }
+  
+  // Remover card da logo no sidebar
+  .sidebar-header {
+    background: transparent !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    margin: 16px 16px 0 16px !important;
+  }
+  
+  // Menu do usuário
+  .mat-mdc-menu-panel {
+    background: #1e293b !important;
+    
+    .mat-mdc-menu-item {
+      color: #e2e8f0 !important;
+      
+      mat-icon {
+        color: #94a3b8 !important;
+      }
+      
+      &:hover {
+        background: #334155 !important;
+      }
+    }
+  }
+  
+  // Tabelas e listas genéricas
+  .mat-mdc-table {
+    background: #1e293b !important;
+    
+    .mat-mdc-header-cell {
+      color: #94a3b8 !important;
+      background: #0f172a !important;
+    }
+    
+    .mat-mdc-cell {
+      color: #e2e8f0 !important;
+      border-bottom-color: #334155 !important;
+    }
+    
+    .mat-mdc-row:hover {
+      background: #334155 !important;
+    }
+  }
+  
+  // Cards genéricos
+  .mat-mdc-card {
+    background: #1e293b !important;
+    color: #e2e8f0 !important;
+  }
+  
+  // Inputs e selects
+  .mat-mdc-form-field {
+    .mat-mdc-text-field-wrapper {
+      background: #334155 !important;
+    }
+    
+    .mat-mdc-input-element {
+      color: #e2e8f0 !important;
+    }
+    
+    .mat-mdc-floating-label {
+      color: #94a3b8 !important;
+    }
+  }
+  
+  // Dialogs
+  .mat-mdc-dialog-container {
+    .mdc-dialog__surface {
+      background: #1e293b !important;
+    }
+    
+    .mat-mdc-dialog-title {
+      color: #f1f5f9 !important;
+    }
+  }
+  
+  // Snackbar
+  .mat-mdc-snack-bar-container {
+    background: #334155 !important;
+    color: #e2e8f0 !important;
+  }
+  
+  // Botões
+  .mat-mdc-button,
+  .mat-mdc-outlined-button {
+    color: #e2e8f0 !important;
+  }
+  
+  // Outras páginas - conteúdo principal
+  .page-header {
+    h1, h2 {
+      color: #f1f5f9 !important;
+    }
+    
+    p {
+      color: #94a3b8 !important;
+    }
+  }
+  
+  // Status chips
+  .status-chip {
+    &.pending {
+      background: rgba(245, 158, 11, 0.2) !important;
+      color: #fbbf24 !important;
+    }
+    
+    &.confirmed {
+      background: rgba(16, 185, 129, 0.2) !important;
+      color: #34d399 !important;
+    }
+    
+    &.completed {
+      background: rgba(59, 130, 246, 0.2) !important;
+      color: #60a5fa !important;
+    }
+    
+    &.cancelled {
+      background: rgba(239, 68, 68, 0.2) !important;
+      color: #f87171 !important;
+    }
+  }
+}
+
+/* You can add global styles to this file, and also import other style files */

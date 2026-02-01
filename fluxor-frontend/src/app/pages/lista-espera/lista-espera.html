@@ -1,0 +1,190 @@
+<div class="lista-espera-container">
+  <app-sidebar></app-sidebar>
+
+  <div class="main-content">
+    <header class="content-header">
+      <div class="search-bar">
+        <mat-icon>search</mat-icon>
+        <input type="text" placeholder="Buscar pacientes, agendamentos...">
+      </div>
+      
+      <div class="user-info">
+        <mat-icon class="notification-icon">notifications_none</mat-icon>
+        
+        <button mat-icon-button [matMenuTriggerFor]="userMenu" class="user-avatar">
+          <div class="avatar-circle">{{ userInitials }}</div>
+        </button>
+        
+        <mat-menu #userMenu="matMenu" class="user-menu">
+          <div class="user-menu-header">
+            <div class="avatar-circle large">{{ userInitials }}</div>
+            <div class="user-details">
+              <h4>{{ userName }}</h4>
+              <p>Admin</p>
+            </div>
+          </div>
+          
+          <button mat-menu-item (click)="goToProfile()">
+            <mat-icon>person</mat-icon>
+            <span>Meu Perfil</span>
+          </button>
+          
+          <button mat-menu-item (click)="logout()">
+            <mat-icon>logout</mat-icon>
+            <span>Sair</span>
+          </button>
+        </mat-menu>
+      </div>
+    </header>
+
+    <div class="content-body">
+      <div class="page-header">
+        <div class="header-info">
+          <h1>Lista de Espera</h1>
+          <p>Gerencie oportunidades de encaixe, antecipação e atendimentos urgentes</p>
+        </div>
+        <button class="btn-novo" (click)="adicionarLista()">
+          <mat-icon>add</mat-icon>
+          Adicionar à Lista
+        </button>
+      </div>
+
+      <div class="info-card">
+        <div class="info-header">
+          <mat-icon>info</mat-icon>
+          <h3>Buffer Inteligente de Atendimento</h3>
+        </div>
+        <p>A Lista de Espera reage automaticamente a cancelamentos e mudanças de agenda, convertendo oportunidades em agendamentos reais.</p>
+      </div>
+
+      <div class="filters-bar">
+        <div class="search-box">
+          <mat-icon>search</mat-icon>
+          <input
+            type="text"
+            placeholder="Buscar por cliente, serviço ou profissional..."
+            [(ngModel)]="searchText"
+            class="filter-input"
+          />
+        </div>
+      </div>
+
+      <div class="filters-row">
+        <div class="filter-buttons">
+          <button
+            [class.active]="selectedFilter === 'todos'"
+            (click)="selectedFilter = 'todos'"
+            class="filter-btn"
+          >
+            Todos
+          </button>
+          <button
+            [class.active]="selectedFilter === 'urgente'"
+            (click)="selectedFilter = 'urgente'"
+            class="filter-btn"
+          >
+            Urgente
+          </button>
+          <button
+            [class.active]="selectedFilter === 'alta'"
+            (click)="selectedFilter = 'alta'"
+            class="filter-btn"
+          >
+            Alta
+          </button>
+        </div>
+        <div class="status-select-container">
+          <select class="select-input">
+            <option value="">Todos os Status</option>
+            <option value="aguardando">Aguardando</option>
+            <option value="contatado">Contatado</option>
+            <option value="confirmado">Confirmado</option>
+          </select>
+          <mat-icon>arrow_drop_down</mat-icon>
+        </div>
+      </div>
+
+      <div class="lista-items">
+        <div *ngIf="itemsFiltrados.length > 0" class="items-container">
+          <div *ngFor="let item of itemsFiltrados" class="item">
+            <div class="item-left">
+              <div class="item-title-section">
+                <h3>{{ item.nomePaciente }}</h3>
+                <div class="item-badges">
+                  <span [class]="'prioridade-badge ' + getPrioridadeBadgeColor(item.prioridade)">
+                    {{ getPrioridadeTexto(item.prioridade) }}
+                  </span>
+                  <span [class]="'status-badge ' + getStatusBadgeColor(item.status)">
+                    {{ item.status | uppercase }}
+                  </span>
+                </div>
+              </div>
+              <div class="item-details">
+                <div class="detail-item">
+                  <span class="label">Serviço</span>
+                  <span>{{ item.servico }}</span>
+                </div>
+                <div class="detail-separator">•</div>
+                <div class="detail-item">
+                  <span class="label">Profissional</span>
+                  <span>{{ item.profissional }}</span>
+                </div>
+                <div class="detail-separator">•</div>
+                <div class="detail-item">
+                  <span class="label">Data Preferia</span>
+                  <span>{{ item.dataPreferia }}</span>
+                </div>
+                <div class="detail-separator">•</div>
+                <div class="detail-item">
+                  <span class="label">Horário</span>
+                  <span>{{ item.horario }}</span>
+                </div>
+                <div *ngIf="item.observacao" class="detail-separator">•</div>
+                <span *ngIf="item.observacao" class="observacao">{{ item.observacao }}</span>
+              </div>
+            </div>
+            <div class="item-right">
+              <div class="dias-espera">
+                <mat-icon>schedule</mat-icon>
+                <span>{{ item.diasEspera }}d</span>
+              </div>
+              <div class="item-actions">
+                <button class="btn-agendar" (click)="agendar(item)">
+                  <mat-icon>calendar_month</mat-icon>
+                  Agendar
+                </button>
+                <button class="btn-detalhes" (click)="verDetalhes(item)">
+                  Ver Detalhes
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div *ngIf="itemsFiltrados.length === 0" class="empty-state">
+          <mat-icon>inbox</mat-icon>
+          <p>Nenhum item na lista de espera</p>
+        </div>
+      </div>
+
+      <div class="footer-stats">
+        <div class="stat-item">
+          <span class="stat-label">Total de Itens</span>
+          <span class="stat-value">{{ totalItens }}</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Urgentes</span>
+          <span class="stat-value urgente">{{ itensUrgentes }}</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Aguardando</span>
+          <span class="stat-value aguardando">{{ itensAguardando }}</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Contatados</span>
+          <span class="stat-value contatado">{{ itensContatados }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

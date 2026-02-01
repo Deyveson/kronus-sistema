@@ -1,0 +1,274 @@
+<div class="dashboard-container">
+  <app-sidebar></app-sidebar>
+  
+  <div class="main-content">
+    <header class="content-header">
+      <div class="search-bar">
+        <mat-icon>search</mat-icon>
+        <input type="text" placeholder="Buscar pacientes, agendamentos...">
+      </div>
+      
+      <div class="user-info">
+        <mat-icon class="notification-icon">notifications_none</mat-icon>
+        
+        <button mat-icon-button [matMenuTriggerFor]="userMenu" class="user-avatar">
+          <div class="avatar-circle">{{ userInitials }}</div>
+        </button>
+        
+        <mat-menu #userMenu="matMenu" class="user-menu">
+          <div class="user-menu-header">
+            <div class="avatar-circle large">{{ userInitials }}</div>
+            <div class="user-details">
+              <h4>{{ userName }}</h4>
+              <p>Admin</p>
+            </div>
+          </div>
+          
+          <button mat-menu-item (click)="goToProfile()">
+            <mat-icon>person</mat-icon>
+            <span>Meu Perfil</span>
+          </button>
+
+          <button mat-menu-item (click)="toggleTheme()">
+            <mat-icon>{{ isDarkMode ? 'light_mode' : 'dark_mode' }}</mat-icon>
+            <span>{{ isDarkMode ? 'Tema Claro' : 'Tema Escuro' }}</span>
+          </button>
+          
+          <button mat-menu-item (click)="logout()">
+            <mat-icon>logout</mat-icon>
+            <span>Sair</span>
+          </button>
+        </mat-menu>
+      </div>
+    </header>
+
+    <div class="content-body">
+      <router-outlet></router-outlet>
+      
+      <!-- Loading spinner -->
+      <div *ngIf="loading" class="loading-container">
+        <mat-spinner diameter="50"></mat-spinner>
+        <p>Carregando dados...</p>
+      </div>
+      
+      <div class="welcome-message">
+        <h1>Bem-vindo de volta, {{ userName }}! 👋</h1>
+        <p>Aqui está um resumo do que está acontecendo na sua clínica hoje.</p>
+      </div>
+
+      <!-- Filtros -->
+      <div class="filters-section">
+        <div class="filter-group">
+          <label for="period-select">Período:</label>
+          <select id="period-select" [(ngModel)]="selectedPeriod" class="filter-select">
+            <option *ngFor="let period of periods" [value]="period.value">
+              {{ period.label }}
+            </option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label for="professional-select">Profissional:</label>
+          <select id="professional-select" [(ngModel)]="selectedProfessional" class="filter-select">
+            <option *ngFor="let prof of professionals" [value]="prof.value">
+              {{ prof.label }}
+            </option>
+          </select>
+        </div>
+
+        <button class="filter-btn" (click)="applyFilters()">Filtrar</button>
+      </div>
+
+      <!-- Aqui virá o conteúdo do dashboard -->
+      <div class="stats-grid" *ngIf="!loading && dashboardData">
+        <div class="stat-card blue">
+          <mat-icon>event</mat-icon>
+          <div class="stat-info">
+            <h3>{{ dashboardData.agendamentos_hoje }}</h3>
+            <p>Total de Agendamentos</p>
+            <span class="change positive" *ngIf="dashboardData.variacao_agendamentos && dashboardData.variacao_agendamentos > 0">+{{ dashboardData.variacao_agendamentos }}%</span>
+            <span class="change negative" *ngIf="dashboardData.variacao_agendamentos && dashboardData.variacao_agendamentos < 0">{{ dashboardData.variacao_agendamentos }}%</span>
+          </div>
+        </div>
+
+        <div class="stat-card green">
+          <mat-icon>people</mat-icon>
+          <div class="stat-info">
+            <h3>{{ dashboardData.total_clientes }}</h3>
+            <p>Pacientes Ativos</p>
+            <span class="change positive" *ngIf="dashboardData.variacao_clientes && dashboardData.variacao_clientes > 0">+{{ dashboardData.variacao_clientes }}%</span>
+            <span class="change negative" *ngIf="dashboardData.variacao_clientes && dashboardData.variacao_clientes < 0">{{ dashboardData.variacao_clientes }}%</span>
+          </div>
+        </div>
+
+        <div class="stat-card pink">
+          <mat-icon>attach_money</mat-icon>
+          <div class="stat-info">
+            <h3>{{ dashboardData.receita_mensal ? formatarReceita(dashboardData.receita_mensal) : 'R$ 0' }}</h3>
+            <p>Receita Mensal</p>
+            <span class="change positive" *ngIf="dashboardData.variacao_receita && dashboardData.variacao_receita > 0">+{{ dashboardData.variacao_receita }}%</span>
+            <span class="change negative" *ngIf="dashboardData.variacao_receita && dashboardData.variacao_receita < 0">{{ dashboardData.variacao_receita }}%</span>
+          </div>
+        </div>
+
+        <div class="stat-card orange">
+          <mat-icon>schedule</mat-icon>
+          <div class="stat-info">
+            <h3>{{ dashboardData.tempo_medio ? dashboardData.tempo_medio : '--' }} min</h3>
+            <p>Tempo Médio</p>
+            <span class="change negative" *ngIf="dashboardData.variacao_tempo && dashboardData.variacao_tempo < 0">{{ dashboardData.variacao_tempo }}%</span>
+            <span class="change positive" *ngIf="dashboardData.variacao_tempo && dashboardData.variacao_tempo > 0">+{{ dashboardData.variacao_tempo }}%</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Estatísticas Rápidas -->
+      <div class="quick-stats" *ngIf="!loading && dashboardData">
+        <h2>Estatísticas Rápidas</h2>
+        <div class="quick-stats-grid">
+          <div class="quick-stat-card">
+            <p class="stat-label">Taxa de Comparecimento</p>
+            <div class="stat-value-row">
+              <h3>{{ dashboardData.taxa_comparecimento ? dashboardData.taxa_comparecimento.toFixed(1) : '0.0' }}%</h3>
+              <span class="change positive" *ngIf="dashboardData.taxa_comparecimento && dashboardData.taxa_comparecimento > 75">Bom</span>
+            </div>
+          </div>
+          
+          <div class="quick-stat-card">
+            <p class="stat-label">Satisfação</p>
+            <div class="stat-value-row">
+              <h3>{{ dashboardData.satisfacao ? dashboardData.satisfacao.toFixed(1) : '--' }}</h3>
+              <span class="change positive" *ngIf="dashboardData.satisfacao && dashboardData.satisfacao >= 4.5">Ótimo</span>
+            </div>
+          </div>
+          
+          <div class="quick-stat-card">
+            <p class="stat-label">No-Show</p>
+            <div class="stat-value-row">
+              <h3>{{ dashboardData.no_show ? dashboardData.no_show.toFixed(1) : '0.0' }}%</h3>
+              <span class="change negative" *ngIf="dashboardData.no_show && dashboardData.no_show > 10">Alto</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Ações Rápidas -->
+      <div class="quick-actions">
+        <div class="action-cards-grid">
+          <button class="action-card blue" (click)="novoAgendamento()">
+            <mat-icon>event_note</mat-icon>
+            <span>Novo Agendamento</span>
+          </button>
+          
+          <button class="action-card green" (click)="cadastrarPaciente()">
+            <mat-icon>person_add</mat-icon>
+            <span>Cadastrar Paciente</span>
+          </button>
+          
+          <button class="action-card orange" routerLink="/lista-espera">
+            <mat-icon>schedule</mat-icon>
+            <span>Lista de Espera</span>
+          </button>
+          
+          <button class="action-card purple" (click)="abrirLinkCliente()">
+            <mat-icon>link</mat-icon>
+            <span>Link do Cliente</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Container com Gráfico e Atividades Recentes -->
+      <div class="chart-activities-container" *ngIf="!loading">
+        <!-- Receita vs Consultas -->
+        <div class="revenue-chart">
+          <div class="chart-header">
+            <h2>Receita & Consultas</h2>
+            <div class="chart-legend">
+              <span class="legend-item">
+                <span class="dot receita"></span>
+                Receita
+              </span>
+              <span class="legend-item">
+                <span class="dot consultas"></span>
+                Consultas
+              </span>
+            </div>
+          </div>
+          <div class="chart-placeholder" *ngIf="dadosGrafico">
+            <div class="chart-bars">
+              <div class="bar-group" *ngFor="let label of dadosGrafico.labels; let i = index">
+                <div class="bars">
+                  <div class="bar receita-bar" 
+                       [style.height.%]="dadosGrafico.receitas[i] > 0 ? Math.max(5, (dadosGrafico.receitas[i] / getMaxReceita() * 100)) : 2"
+                       [style.opacity]="dadosGrafico.receitas[i] > 0 ? 1 : 0.3"
+                       [title]="'R$ ' + (dadosGrafico.receitas[i] || 0).toFixed(2)">
+                  </div>
+                  <div class="bar consultas-bar" 
+                       [style.height.%]="dadosGrafico.consultas[i] > 0 ? Math.max(5, (dadosGrafico.consultas[i] / getMaxConsultas() * 100)) : 2"
+                       [style.opacity]="dadosGrafico.consultas[i] > 0 ? 1 : 0.3"
+                       [title]="(dadosGrafico.consultas[i] || 0) + ' consultas'">
+                  </div>
+                </div>
+                <span class="bar-label">{{ label }}</span>
+              </div>
+            </div>
+          </div>
+          <div *ngIf="!dadosGrafico" class="empty-chart">
+            <p>Carregando dados do gráfico...</p>
+          </div>
+        </div>
+
+        <!-- Atividades Recentes -->
+        <div class="recent-activities">
+          <h2>Atividades Recentes</h2>
+          <div class="activities-list" *ngIf="!loading && atividadesRecentes.length > 0">
+            <div class="activity-item" *ngFor="let atividade of atividadesRecentes">
+              <div class="activity-icon" [ngClass]="atividade.cor">
+                <mat-icon>{{ atividade.icone }}</mat-icon>
+              </div>
+              <div class="activity-details">
+                <p class="activity-title">{{ atividade.titulo }}</p>
+                <span class="activity-subtitle">{{ atividade.subtitulo }}</span>
+                <span class="activity-time">{{ atividade.tempo }}</span>
+              </div>
+            </div>
+          </div>
+          <div *ngIf="!loading && atividadesRecentes.length === 0" class="empty-state">
+            <p>Nenhuma atividade recente</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Próximos Agendamentos -->
+      <div class="upcoming-appointments">
+        <div class="appointments-header">
+          <h2>Próximos Agendamentos</h2>
+          <a [routerLink]="['/agenda']" class="view-all">Ver todos</a>
+        </div>
+        
+        <div class="appointments-list" *ngIf="!loading && proximosAgendamentos.length > 0">
+          <div class="appointment-card" *ngFor="let agendamento of proximosAgendamentos">
+            <div class="appointment-avatar">{{ agendamento.cliente_iniciais }}</div>
+            <div class="appointment-info">
+              <h4>{{ agendamento.cliente_nome }}</h4>
+              <p>{{ agendamento.servico_nome }}</p>
+            </div>
+            <div class="appointment-time">
+              <mat-icon>schedule</mat-icon>
+              <span>{{ agendamento.hora }}</span>
+              <span class="date">{{ agendamento.data_texto }}</span>
+            </div>
+            <div class="appointment-status" [ngClass]="getStatusClass(agendamento.status)">
+              <mat-icon *ngIf="agendamento.status === 'confirmado'">check_circle</mat-icon>
+              <mat-icon *ngIf="agendamento.status === 'agendado'">access_time</mat-icon>
+              <mat-icon *ngIf="agendamento.status === 'cancelado'">cancel</mat-icon>
+            </div>
+          </div>
+        </div>
+        <div *ngIf="!loading && proximosAgendamentos.length === 0" class="empty-state">
+          <p>Nenhum agendamento próximo</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
