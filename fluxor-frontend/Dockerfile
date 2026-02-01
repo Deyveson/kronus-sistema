@@ -21,7 +21,7 @@ FROM node:20-alpine
 WORKDIR /app
 
 # Copiar arquivos buildados
-COPY --from=build /app/dist/fluxor-frontend/browser ./dist
+COPY --from=build /app/dist/fluxor-atendimento/browser ./dist
 
 # Copiar server e dependências
 COPY --from=build /app/server.js ./
