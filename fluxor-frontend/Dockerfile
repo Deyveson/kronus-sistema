@@ -15,17 +15,22 @@ COPY . .
 # Build da aplicação em modo produção
 RUN npm run build
 
-# Etapa 2: Servir com Nginx
-FROM nginx:alpine
+# Etapa 2: Servir com Node.js (para Railway)
+FROM node:20-alpine
+
+WORKDIR /app
 
 # Copiar arquivos buildados
-COPY --from=build /app/dist/fluxor-atendimento/browser /usr/share/nginx/html
+COPY --from=build /app/dist/fluxor-frontend/browser ./dist
 
-# Copiar configuração customizada do nginx
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Copiar server e dependências
+COPY --from=build /app/server.js ./
+COPY --from=build /app/package*.json ./
+RUN npm install --only=production --legacy-peer-deps
 
-# Expor porta 80
-EXPOSE 80
+# Railway usa porta dinâmica via $PORT
+EXPOSE 3000
 
 # Comando de inicialização
+CMD ["node", "server.js"]
 CMD ["nginx", "-g", "daemon off;"]
