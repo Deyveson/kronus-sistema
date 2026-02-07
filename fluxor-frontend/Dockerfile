@@ -29,7 +29,7 @@ COPY --from=build /app/package*.json ./
 RUN npm install --only=production --legacy-peer-deps
 
 # Railway usa porta dinâmica via $PORT
-EXPOSE 3000
+EXPOSE 4200
 
 # Comando de inicialização
 CMD ["node", "server.js"]
