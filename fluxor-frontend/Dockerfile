@@ -33,4 +33,3 @@ EXPOSE 3000
 
 # Comando de inicialização
 CMD ["node", "server.js"]
-CMD ["nginx", "-g", "daemon off;"]
